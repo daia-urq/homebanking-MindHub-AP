@@ -17,15 +17,17 @@ import static java.util.stream.Collectors.toList;
 public class ClientController {
 
     @Autowired
-    ClientRepository clientRepository;
+    private ClientRepository clientRepository;
+
     @RequestMapping("/clients")
     public List<ClientDTO> getClients(){
         return clientRepository.findAll().stream().map(client -> new ClientDTO(client)).collect(toList());
     }
 
+
     @RequestMapping("/clients/{id}")
-    public Optional<ClientDTO> getClient(@PathVariable Long id){
-        Optional<ClientDTO> clientDTO = Optional.ofNullable(clientRepository.findById(id).map(client -> new ClientDTO(client)).get());
+    public ClientDTO getClient(@PathVariable Long id){
+        ClientDTO clientDTO = clientRepository.findById(id).map(client -> new ClientDTO(client)).orElse(null);
 
         return clientDTO;
     }
