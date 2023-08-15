@@ -21,7 +21,7 @@ public class HomebankingApplication {
     @Bean
     public CommandLineRunner initData(ClientRepository clientRepository, AccountRepository accountRepository,
                                       TransactionRepository transactionRepository, LoanRepository loanRepository,
-                                      ClientLoanRepository clientLoanRepository) {
+                                      ClientLoanRepository clientLoanRepository, CardRepository cardRepository) {
         return (args) -> {
 
             Client client = new Client("Melba", "Morel", "melba@mindhub.com");
@@ -51,13 +51,13 @@ public class HomebankingApplication {
             accountRepository.save(account5);
 
             LocalDateTime now1 = LocalDateTime.now();
-            Transaction transaction1 = new Transaction(TransactionType.CREDITO, 1000.00, "envío", now1);
-            Transaction transaction2 = new Transaction(TransactionType.DEBITO, -500.00, "fotocopias", now1);
-            Transaction transaction3 = new Transaction(TransactionType.CREDITO, 5000.00, "venta", now1);
+            Transaction transaction1 = new Transaction(TransactionType.CREDIT, 1000.00, "DELIVERY", now1);
+            Transaction transaction2 = new Transaction(TransactionType.DEBIT, -500.00, "PHOTOCOPY", now1);
+            Transaction transaction3 = new Transaction(TransactionType.CREDIT, 5000.00, "SALE", now1);
 
-            Transaction transaction4 = new Transaction(TransactionType.CREDITO, 10000.00, "venta", now1);
-            Transaction transaction5 = new Transaction(TransactionType.DEBITO, -5000.00, "pago wifi", now1);
-            Transaction transaction6 = new Transaction(TransactionType.CREDITO, 3000.00, "otros", now1);
+            Transaction transaction4 = new Transaction(TransactionType.CREDIT, 10000.00, "SALE", now1);
+            Transaction transaction5 = new Transaction(TransactionType.DEBIT, -5000.00, "INTERNET PAYMENT", now1);
+            Transaction transaction6 = new Transaction(TransactionType.CREDIT, 3000.00, "OTHER", now1);
 
             account1.addTransaction(transaction1);
             account1.addTransaction(transaction2);
@@ -109,6 +109,22 @@ public class HomebankingApplication {
 			client2.addClientLoan(clientLoan4);
 			loan3.addClientLoan(clientLoan4);
 			clientLoanRepository.save(clientLoan4);
+
+
+            String name1 = client.getFirstName() +" "+ client.getLastName();
+            String name2 = client2.getFirstName() +" "+ client2.getLastName();
+
+            Card card1 = new Card(name1,"4666 4666 4666 4666", (short) 789, CardColor.GOLD, CardType.DEBIT, today, today.plusYears(5) );
+            Card card2 = new Card(name1,"4777 4777 4777 4777", (short) 456, CardColor.TITANIUM, CardType.CREDIT , today ,today.plusYears(5));
+            Card card3 = new Card(name2,"4888 4888 4888 4888", (short) 123, CardColor.SILVER, CardType.CREDIT, today ,today.plusYears(5));
+
+            client.addCard(card1);
+            client.addCard(card2);
+            cardRepository.save(card1);
+            cardRepository.save(card2);
+
+            client2.addCard(card3);
+            cardRepository.save(card3);
 
         };
     }
