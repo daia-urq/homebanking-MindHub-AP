@@ -44,16 +44,16 @@ public class Card {
         return number;
     }
 
+    public void setNumber(String number) {
+        this.number = number;
+    }
+
     public String getCardHolder() {
         return cardHolder;
     }
 
     public void setCardHolder(String cardHolder) {
         this.cardHolder = cardHolder;
-    }
-
-    public void setNumber(String number) {
-        this.number = number;
     }
 
     public short getCvv() {

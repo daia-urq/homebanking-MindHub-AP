@@ -62,13 +62,16 @@ public class Loan {
     public Set<ClientLoan> getClientLoans() {
         return clientLoans;
     }
+
+    public List<Client> getClients(){
+        return clientLoans.stream().map(client -> client.getClient()).collect(Collectors.toList());
+    }
+
     public void addClientLoan(ClientLoan clientLoan) {
         clientLoan.setLoan(this);
         clientLoans.add(clientLoan);
     }
 
-    public List<Client> getClients(){
-        return clientLoans.stream().map(client -> client.getClient()).collect(Collectors.toList());
-    }
+
 
 }
