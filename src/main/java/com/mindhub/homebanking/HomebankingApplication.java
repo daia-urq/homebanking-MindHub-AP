@@ -38,16 +38,16 @@ public class HomebankingApplication {
             LocalDate tomorrow = today.plusDays(1);
             LocalDate someday = today.plusDays(3);
 
-            Account account1 = new Account("VIN0001", today, 5000.00);
-            Account account2 = new Account("VIN0002", tomorrow, 7500.00);
+            Account account1 = new Account("VIN-00000001", today, 5000.00);
+            Account account2 = new Account("VIN-00000002", tomorrow, 7500.00);
             client.addAccount(account1);
             client.addAccount(account2);
 
             accountRepository.save(account1);
             accountRepository.save(account2);
 
-            Account account4 = new Account("VIN0003", today, 3000.00);
-            Account account5 = new Account("VIN0004", someday, 4500.00);
+            Account account4 = new Account("VIN-00000003", today, 3000.00);
+            Account account5 = new Account("VIN-00000004", someday, 4500.00);
             client2.addAccount(account4);
             client2.addAccount(account5);
 
