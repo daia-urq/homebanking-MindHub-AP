@@ -23,12 +23,24 @@ import java.util.Set;
 @RequestMapping("/api")
 public class CardController  {
     @Autowired
-    CardRepository cardRepository;
+    private CardRepository cardRepository;
     @Autowired
-    ClientRepository clientRepository;
+    private ClientRepository clientRepository;
 
     @PostMapping("/clients/current/cards")
     public ResponseEntity<Object> createCard( @RequestParam CardType cardType, @RequestParam CardColor cardColor,  Authentication authentication){
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return new ResponseEntity<>("LogIn", HttpStatus.FORBIDDEN);
+        }
+
+        if(cardColor == null){
+            return new ResponseEntity<>("Missing card color", HttpStatus.FORBIDDEN);
+        }
+
+        if(cardType == null){
+            return new ResponseEntity<>("Missing card type", HttpStatus.FORBIDDEN);
+        }
 
         Client client  = clientRepository.findByEmail(authentication.getName()).orElse(null);
 

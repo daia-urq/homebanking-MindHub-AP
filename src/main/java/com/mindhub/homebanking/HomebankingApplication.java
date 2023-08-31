@@ -38,16 +38,16 @@ public class HomebankingApplication {
             LocalDate tomorrow = today.plusDays(1);
             LocalDate someday = today.plusDays(3);
 
-            Account account1 = new Account("VIN-00000001", today, 5000.00);
-            Account account2 = new Account("VIN-00000002", tomorrow, 7500.00);
+            Account account1 = new Account("VIN00000001", today, 5000.00);
+            Account account2 = new Account("VIN00000002", tomorrow, 7500.00);
             client.addAccount(account1);
             client.addAccount(account2);
 
             accountRepository.save(account1);
             accountRepository.save(account2);
 
-            Account account4 = new Account("VIN-00000003", today, 3000.00);
-            Account account5 = new Account("VIN-00000004", someday, 4500.00);
+            Account account4 = new Account("VIN00000003", today, 3000.00);
+            Account account5 = new Account("VIN00000004", someday, 4500.00);
             client2.addAccount(account4);
             client2.addAccount(account5);
 
@@ -65,6 +65,7 @@ public class HomebankingApplication {
 
             account1.addTransaction(transaction1);
             account1.addTransaction(transaction2);
+
             account2.addTransaction(transaction3);
             account4.addTransaction(transaction4);
             account4.addTransaction(transaction5);
@@ -77,6 +78,18 @@ public class HomebankingApplication {
             transactionRepository.save(transaction5);
             transactionRepository.save(transaction6);
 
+            account1.setBalance(account1.getBalance() + transaction1.getAmount());
+            account1.setBalance(account1.getBalance() + transaction2.getAmount());
+            account2.setBalance(account2.getBalance() + transaction3.getAmount());
+            account4.setBalance(account4.getBalance() + transaction4.getAmount());
+            account4.setBalance(account4.getBalance() + transaction5.getAmount());
+            account5.setBalance(account5.getBalance() + transaction6.getAmount());
+
+            accountRepository.save(account1);
+            accountRepository.save(account2);
+            accountRepository.save(account4);
+            accountRepository.save(account5);
+
             List<Integer> listPayments1 = List.of(12, 24, 36, 48, 60);
             List<Integer> listPayments2 = List.of(6, 12, 24);
             List<Integer> listPayments3 = List.of(6, 12, 24, 36);
@@ -84,6 +97,7 @@ public class HomebankingApplication {
             Loan loan1 = new Loan("mortgage", 500000.00, listPayments1);
             Loan loan2 = new Loan("personal", 100000.00, listPayments2);
             Loan loan3 = new Loan("automotive", 300000.00, listPayments3);
+
             loanRepository.save(loan1);
             loanRepository.save(loan2);
             loanRepository.save(loan3);

@@ -23,13 +23,13 @@ class WebAuthorization{
    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http.authorizeRequests()
-                .antMatchers("/web/index.html").permitAll()
-                .antMatchers("/web/js/index.js").permitAll()
-                .antMatchers("/web/css/style.css").permitAll()
+                .antMatchers("/web/index.html", "/web/js/index.js",
+                        "/web/css/style.css", "/web/img/**").permitAll()
                 .antMatchers(HttpMethod.POST, "/api/clients").permitAll()
-                .antMatchers("/admin/**").hasAuthority("ADMIN")
-                .antMatchers("/api/clients/current/accounts").hasAuthority("CLIENT")
-                .antMatchers("/**").hasAuthority("CLIENT");
+                .antMatchers(HttpMethod.POST, "/api/transactions").hasAuthority("CLIENT")
+                .antMatchers("/api/clients/current/accounts",
+                        "/api/clients/current",
+                        "/api/clients/current/cards", "/web/**","/api/accounts/{id}").hasAuthority("CLIENT").anyRequest().denyAll();
 
         http.formLogin()
                 .usernameParameter("email")
@@ -37,7 +37,7 @@ class WebAuthorization{
 
                 .loginPage("/api/login");
 
-        http.logout().logoutUrl("/api/logout");
+        http.logout().logoutUrl("/api/logout").deleteCookies("JSESSIONID");
 
 
         // turn off checking for CSRF tokens

@@ -30,15 +30,17 @@ public class ClientController {
     @Autowired
     private AccountRepository accountRepository;
 
+    //tiene validacion que no ingrese un cliente,en antmatchers
     @RequestMapping("/clients")
     public List<ClientDTO> getClients(){
         return clientRepository.findAll().stream().map(client -> new ClientDTO(client)).collect(toList());
     }
 
+    //tiene validacion que no ingrese un cliente, en antmatchers
     @RequestMapping("/clients/{id}")
     public ClientDTO getClient(@PathVariable Long id){
-        ClientDTO clientDTO = clientRepository.findById(id).map(client -> new ClientDTO(client)).orElse(null);
 
+        ClientDTO clientDTO = clientRepository.findById(id).map(client -> new ClientDTO(client)).orElse(null);
         return clientDTO;
     }
 
@@ -88,8 +90,14 @@ public class ClientController {
         return new ResponseEntity<>("Client created",HttpStatus.CREATED);
     }
 
+
     @RequestMapping("clients/current")
     public ClientDTO getClientsCurrent(Authentication authentication){
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return null;
+        }
+
         ClientDTO clientDTO = clientRepository.findByEmail(authentication.getName()).map(client -> new ClientDTO(client)).orElse(null);
 
         return clientDTO;
