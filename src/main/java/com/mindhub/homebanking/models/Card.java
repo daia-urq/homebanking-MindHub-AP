@@ -20,13 +20,13 @@ public class Card {
     private LocalDate thruDate;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name="client_id")
-    private Client client ;
+    @JoinColumn(name = "client_id")
+    private Client client;
 
     public Card() {
     }
 
-    public Card(String cardHolder, String number, short cvv, CardColor color, CardType type, LocalDate fromDate , LocalDate thruDate) {
+    public Card(String cardHolder, String number, short cvv, CardColor color, CardType type, LocalDate fromDate, LocalDate thruDate) {
         this.cardHolder = cardHolder;
         this.number = number;
         this.cvv = cvv;

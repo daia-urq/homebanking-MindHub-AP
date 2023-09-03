@@ -28,12 +28,15 @@ public class TransactionDTO {
     public long getId() {
         return id;
     }
+
     public TransactionType getType() {
         return type;
     }
+
     public Double getAmount() {
         return amount;
     }
+
     public String getDescription() {
         return description;
     }

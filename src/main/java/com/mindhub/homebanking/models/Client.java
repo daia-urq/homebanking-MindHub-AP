@@ -23,11 +23,11 @@ public class Client {
     @OneToMany(mappedBy = "client", fetch = FetchType.EAGER)
     private Set<Account> accounts = new HashSet<>();
 
-    @OneToMany(mappedBy="client", fetch=FetchType.EAGER)
-    private Set<ClientLoan> clientLoans  = new HashSet<>();
+    @OneToMany(mappedBy = "client", fetch = FetchType.EAGER)
+    private Set<ClientLoan> clientLoans = new HashSet<>();
 
-    @OneToMany(mappedBy="client", fetch=FetchType.EAGER)
-    private Set<Card> cards  = new HashSet<>();
+    @OneToMany(mappedBy = "client", fetch = FetchType.EAGER)
+    private Set<Card> cards = new HashSet<>();
 
     public Client() {
     }
@@ -79,31 +79,30 @@ public class Client {
         return accounts;
     }
 
-
     public Set<ClientLoan> getClientLoans() {
         return clientLoans;
     }
-
 
     public Set<Card> getCards() {
         return cards;
     }
 
     @JsonIgnore
-    public List<Loan> getLoans(){
-        return clientLoans.stream().map(loan ->loan.getLoan()).collect(Collectors.toList());
+    public List<Loan> getLoans() {
+        return clientLoans.stream().map(loan -> loan.getLoan()).collect(Collectors.toList());
     }
 
     public void addAccount(Account account) {
         account.setClient(this);
         accounts.add(account);
     }
+
     public void addClientLoan(ClientLoan clientLoan) {
         clientLoan.setClient(this);
         clientLoans.add(clientLoan);
     }
 
-    public void addCard(Card card){
+    public void addCard(Card card) {
         card.setClient(this);
         cards.add(card);
     }

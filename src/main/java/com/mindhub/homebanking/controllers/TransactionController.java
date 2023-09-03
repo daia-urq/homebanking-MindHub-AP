@@ -5,6 +5,9 @@ import com.mindhub.homebanking.models.*;
 import com.mindhub.homebanking.repositories.AccountRepository;
 import com.mindhub.homebanking.repositories.ClientRepository;
 import com.mindhub.homebanking.repositories.TransactionRepository;
+import com.mindhub.homebanking.services.AccountService;
+import com.mindhub.homebanking.services.ClientService;
+import com.mindhub.homebanking.services.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,18 +29,18 @@ import java.util.Set;
 public class TransactionController {
 
     @Autowired
-    private TransactionRepository transactionRepository;
+    private TransactionService transactionService;
 
     @Autowired
-    private AccountRepository accountRepository;
+    private AccountService accountService;
 
     @Autowired
-    private ClientRepository clientRepository;
+    private ClientService clientService;
 
 
     @Transactional
     @PostMapping("/transactions")
-    public ResponseEntity<Object> createTransaction( @RequestParam String fromAccountNumber, @RequestParam String toAccountNumber, @RequestParam Double amount, @RequestParam String description){
+    public ResponseEntity<Object> createTransaction(@RequestParam String fromAccountNumber, @RequestParam String toAccountNumber, @RequestParam Double amount, @RequestParam String description) {
         //obtener datos de autenticadocion
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -55,62 +58,61 @@ public class TransactionController {
         if (description.isEmpty()) {
             return new ResponseEntity<>("Missing description", HttpStatus.FORBIDDEN);
         }
-        if(amount.toString().isEmpty()){
+        if (amount.toString().isEmpty()) {
             return new ResponseEntity<>("Missing amount", HttpStatus.FORBIDDEN);
         }
 
         //validad que el numero de cuanta de origen y destino recibido por parametro no sean los mismos
-        if( fromAccountNumber.equals(toAccountNumber)){
+        if (fromAccountNumber.equals(toAccountNumber)) {
             return new ResponseEntity<>("The accounts cannot be the same", HttpStatus.FORBIDDEN);
         }
 
-        //cuenta de destino recibida por parametro
-        Account fromAccount = accountRepository.findByNumber(fromAccountNumber);
-
-        if(fromAccount == null ){
-            return new ResponseEntity<>("The accounts dont exists", HttpStatus.FORBIDDEN);
+        if(!accountService.existsByNumber(fromAccountNumber)){
+            return new ResponseEntity<>("The accounts don´t exists", HttpStatus.FORBIDDEN);
         }
+        //cuenta de destino recibida por parametro
+        Account fromAccount = accountService.findByNumber(fromAccountNumber);
 
-        //cliente que esta autenticado
+        //email cliente que esta autenticado
         String nameClientAuthenticated = authentication.getName();
-        Client clientAuthenticated = clientRepository.findByEmail(nameClientAuthenticated).orElse(null);
+        Client clientAuthenticated = clientService.findByEmail(nameClientAuthenticated);
 
         //validar que cliente autenticado sea el cliente asociados a la cuenta de origen
-        if( clientAuthenticated != fromAccount.getClient()){
+        if (clientAuthenticated != fromAccount.getClient()) {
             return new ResponseEntity<>("This is not your account", HttpStatus.FORBIDDEN);
         }
 
-        //cuenta de destino recibida por parametro
-        Account toAccount = accountRepository.findByNumber(toAccountNumber);
-
-        if(toAccount== null ){
-            return new ResponseEntity<>("The accounts dont exists", HttpStatus.FORBIDDEN);
+        if(!accountService.existsByNumber(toAccountNumber)){
+            return new ResponseEntity<>("The accounts don´t exists", HttpStatus.FORBIDDEN);
         }
+        //cuenta de destino recibida por parametro
+        Account toAccount = accountService.findByNumber(toAccountNumber);
 
-        if(amount <1){
+        if (amount < 1) {
             return new ResponseEntity<>("invalid amount", HttpStatus.FORBIDDEN);
 
         }
-        if(fromAccount.getBalance() < amount){
+
+        if (fromAccount.getBalance() < amount) {
             return new ResponseEntity<>("Insufficient funds to approve this operations", HttpStatus.FORBIDDEN);
         }
 
         LocalDateTime now = LocalDateTime.now();
 
-        Transaction transactionDebit = new Transaction(TransactionType.DEBIT, (amount*-1),description, now);
-        Transaction transactionCredit = new Transaction(TransactionType.CREDIT, amount,description,now);
+        Transaction transactionDebit = new Transaction(TransactionType.DEBIT, (amount * -1), description, now);
+        Transaction transactionCredit = new Transaction(TransactionType.CREDIT, amount, description, now);
 
         fromAccount.addTransaction(transactionDebit);
         toAccount.addTransaction(transactionCredit);
-        transactionRepository.save(transactionDebit);
-        transactionRepository.save(transactionCredit);
+        transactionService.saveTransaction(transactionDebit);
+        transactionService.saveTransaction(transactionCredit);
 
-        double restBalance = fromAccount.getBalance()+(amount*-1);
+        double restBalance = fromAccount.getBalance() + (amount * -1);
         fromAccount.setBalance(restBalance);
-        toAccount.setBalance( toAccount.getBalance() +amount );
+        toAccount.setBalance(toAccount.getBalance() + amount);
 
-        accountRepository.save(fromAccount);
-        accountRepository.save(toAccount);
+        accountService.saveAccount(fromAccount);
+        accountService.saveAccount(toAccount);
 
         return new ResponseEntity<>("Successful transfer", HttpStatus.OK);
     }

@@ -4,7 +4,8 @@ import com.mindhub.homebanking.dtos.ClientDTO;
 import com.mindhub.homebanking.models.Account;
 import com.mindhub.homebanking.models.Client;
 import com.mindhub.homebanking.repositories.AccountRepository;
-import com.mindhub.homebanking.repositories.ClientRepository;
+import com.mindhub.homebanking.services.AccountService;
+import com.mindhub.homebanking.services.ClientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,34 +25,36 @@ import static java.util.stream.Collectors.toList;
 public class ClientController {
 
     @Autowired
-    private ClientRepository clientRepository;
+    private ClientService clientService;
+
+    @Autowired
+    private AccountService accountService;
+
     @Autowired
     private PasswordEncoder passwordEncoder;
-    @Autowired
-    private AccountRepository accountRepository;
+
 
     //tiene validacion que no ingrese un cliente,en antmatchers
     @RequestMapping("/clients")
-    public List<ClientDTO> getClients(){
-        return clientRepository.findAll().stream().map(client -> new ClientDTO(client)).collect(toList());
+    public List<ClientDTO> getClients() {
+        return clientService.getClientsDTO();
     }
 
     //tiene validacion que no ingrese un cliente, en antmatchers
     @RequestMapping("/clients/{id}")
-    public ClientDTO getClient(@PathVariable Long id){
+    public ClientDTO getClient(@PathVariable Long id) {
 
-        ClientDTO clientDTO = clientRepository.findById(id).map(client -> new ClientDTO(client)).orElse(null);
-        return clientDTO;
+        return clientService.getClientDTOByID(id);
     }
 
     @PostMapping("/clients")
-    public ResponseEntity<Object> register(@RequestParam String firstName, @RequestParam String lastName, @RequestParam  String email, @RequestParam String password){
+    public ResponseEntity<Object> register(@RequestParam String firstName, @RequestParam String lastName, @RequestParam String email, @RequestParam String password) {
 
         if (firstName.isEmpty()) {
             return new ResponseEntity<>("Missing first name", HttpStatus.FORBIDDEN);
         }
 
-        if (lastName.isEmpty() ) {
+        if (lastName.isEmpty()) {
             return new ResponseEntity<>("Missing last name", HttpStatus.FORBIDDEN);
         }
 
@@ -63,44 +66,39 @@ public class ClientController {
             return new ResponseEntity<>("Missing password", HttpStatus.FORBIDDEN);
         }
 
-        if (clientRepository.findByEmail(email).isPresent()) {
-
+        if (clientService.existsByEmail(email)) {
             return new ResponseEntity<>("Email already in use", HttpStatus.FORBIDDEN);
-
         }
 
         Client client = new Client(firstName, lastName, email, passwordEncoder.encode(password));
 
-        clientRepository.save(client);
+        clientService.saveClient(client);
 
         LocalDate today = LocalDate.now();
         Random random = new Random();
-        String number ;
+        String number;
         int randomNum;
 
         do {
             randomNum = random.nextInt(90000000) + 10000000;
             number = "VIN-" + randomNum;
-        } while (accountRepository.existsByNumber(number));
+        } while (accountService.existsByNumber(number));
 
         Account account = new Account(number, today, 0.00);
         client.addAccount(account);
-        accountRepository.save(account);
+        accountService.saveAccount(account);
 
-        return new ResponseEntity<>("Client created",HttpStatus.CREATED);
+        return new ResponseEntity<>("Client created", HttpStatus.CREATED);
     }
 
 
-    @RequestMapping("clients/current")
-    public ClientDTO getClientsCurrent(Authentication authentication){
+    @RequestMapping("/clients/current")
+    public ClientDTO getClientsCurrent(Authentication authentication) {
 
         if (authentication == null || !authentication.isAuthenticated()) {
             return null;
         }
-
-        ClientDTO clientDTO = clientRepository.findByEmail(authentication.getName()).map(client -> new ClientDTO(client)).orElse(null);
-
-        return clientDTO;
+        return clientService.getClientDTOByEmail(authentication.getName());
     }
 
 }

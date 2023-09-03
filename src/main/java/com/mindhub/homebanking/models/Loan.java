@@ -35,6 +35,7 @@ public class Loan {
     public long getId() {
         return id;
     }
+
     public String getName() {
         return name;
     }
@@ -63,7 +64,7 @@ public class Loan {
         return clientLoans;
     }
 
-    public List<Client> getClients(){
+    public List<Client> getClients() {
         return clientLoans.stream().map(client -> client.getClient()).collect(Collectors.toList());
     }
 
@@ -71,7 +72,5 @@ public class Loan {
         clientLoan.setLoan(this);
         clientLoans.add(clientLoan);
     }
-
-
 
 }

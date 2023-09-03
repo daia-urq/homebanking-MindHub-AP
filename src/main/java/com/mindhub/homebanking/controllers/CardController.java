@@ -6,6 +6,8 @@ import com.mindhub.homebanking.models.CardType;
 import com.mindhub.homebanking.models.Client;
 import com.mindhub.homebanking.repositories.CardRepository;
 import com.mindhub.homebanking.repositories.ClientRepository;
+import com.mindhub.homebanking.services.CardService;
+import com.mindhub.homebanking.services.ClientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,71 +23,72 @@ import java.util.Set;
 
 @RestController
 @RequestMapping("/api")
-public class CardController  {
+public class CardController {
     @Autowired
-    private CardRepository cardRepository;
+    private CardService cardService;
     @Autowired
-    private ClientRepository clientRepository;
+    private ClientService clientService;
 
     @PostMapping("/clients/current/cards")
-    public ResponseEntity<Object> createCard( @RequestParam CardType cardType, @RequestParam CardColor cardColor,  Authentication authentication){
+    public ResponseEntity<Object> createCard(@RequestParam CardType cardType, @RequestParam CardColor cardColor, Authentication authentication) {
 
         if (authentication == null || !authentication.isAuthenticated()) {
             return new ResponseEntity<>("LogIn", HttpStatus.FORBIDDEN);
         }
 
-        if(cardColor == null){
+        if (cardColor == null) {
             return new ResponseEntity<>("Missing card color", HttpStatus.FORBIDDEN);
         }
 
-        if(cardType == null){
+        if (cardType == null) {
             return new ResponseEntity<>("Missing card type", HttpStatus.FORBIDDEN);
         }
 
-        Client client  = clientRepository.findByEmail(authentication.getName()).orElse(null);
+        if (!clientService.existsByEmail(authentication.getName())) {
+            return new ResponseEntity<>("Client not found", HttpStatus.FORBIDDEN);
+        }
 
-        if(client != null){
-            Set<Card> cards = client.getCards();
-            long countTypeCards = cards.stream().filter(card -> cardType.equals(card.getType())).count();
+        Client client = clientService.findByEmail(authentication.getName());
 
-            if(countTypeCards <=2){
-                Random random = new Random();
-                LocalDate today = LocalDate.now();
-                String name = client.getFirstName()+ " "+ client.getLastName();
+        Set<Card> cards = client.getCards();
+        long countTypeCards = cards.stream().filter(card -> cardType.equals(card.getType())).count();
 
-                int cvv = random.nextInt(999) + 1;
-                //agrega ceros a la izquierda si el nuumero es menor a 100
-                String formattedCvv = String.format("%03d", cvv);
-                //lo pasa a short para poder pasrlo por el constructor
-                short cvvShort = Short.parseShort(formattedCvv);
+        if (countTypeCards <= 2) {
+            Random random = new Random();
+            LocalDate today = LocalDate.now();
+            String name = client.getFirstName() + " " + client.getLastName();
 
-                //numero de tarjeta
-                String cardNumber;
-                do {
-                    //para crear el numero de tarjeta de 16 digitos
-                    StringBuilder cardNumberBuilder = new StringBuilder();
-                    cardNumber = null;
-                    for (int i = 0; i < 4; i++) {
-                        for (int j = 0; j < 4; j++) {
-                            int digit = random.nextInt(10);
-                            cardNumberBuilder.append(digit);
-                        }
-                        if (i < 3) {
-                            cardNumberBuilder.append(" ");
-                        }
+            int cvv = random.nextInt(999) + 1;
+            //agrega ceros a la izquierda si el nuumero es menor a 100
+            String formattedCvv = String.format("%03d", cvv);
+            //lo pasa a short para poder pasrlo por el constructor
+            short cvvShort = Short.parseShort(formattedCvv);
+
+            //numero de tarjeta
+            String cardNumber;
+            do {
+                //para crear el numero de tarjeta de 16 digitos
+                StringBuilder cardNumberBuilder = new StringBuilder();
+                cardNumber = null;
+                for (int i = 0; i < 4; i++) {
+                    for (int j = 0; j < 4; j++) {
+                        int digit = random.nextInt(10);
+                        cardNumberBuilder.append(digit);
                     }
-                    cardNumber = cardNumberBuilder.toString();
-                } while (cardRepository.existsByNumber(cardNumber));
+                    if (i < 3) {
+                        cardNumberBuilder.append(" ");
+                    }
+                }
+                cardNumber = cardNumberBuilder.toString();
+            } while (cardService.existsByNumber(cardNumber));
 
-                Card card = new Card(name,cardNumber, cvvShort, cardColor, cardType, today, today.plusYears(5) );
-                client.addCard(card);
-                cardRepository.save(card);
-                return new ResponseEntity<>("Card created", HttpStatus.CREATED);
-            }else{
-                return new ResponseEntity<>("Maximum card reached", HttpStatus.FORBIDDEN);
-            }
-        }else {
-            return new ResponseEntity<>("Client not found", HttpStatus.BAD_REQUEST);
+            Card card = new Card(name, cardNumber, cvvShort, cardColor, cardType, today, today.plusYears(5));
+            client.addCard(card);
+
+            cardService.saveCard(card);
+            return new ResponseEntity<>("Card created", HttpStatus.CREATED);
+        } else {
+            return new ResponseEntity<>("Maximum card reached", HttpStatus.FORBIDDEN);
         }
     }
 }

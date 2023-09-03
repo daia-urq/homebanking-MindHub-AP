@@ -17,10 +17,10 @@ import javax.servlet.http.HttpSession;
 
 @Configuration
 @EnableWebSecurity
-class WebAuthorization{
+class WebAuthorization {
 
-   @Bean
-   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http.authorizeRequests()
                 .antMatchers("/web/index.html", "/web/js/index.js",
@@ -28,8 +28,8 @@ class WebAuthorization{
                 .antMatchers(HttpMethod.POST, "/api/clients").permitAll()
                 .antMatchers(HttpMethod.POST, "/api/transactions").hasAuthority("CLIENT")
                 .antMatchers("/api/clients/current/accounts",
-                        "/api/clients/current",
-                        "/api/clients/current/cards", "/web/**","/api/accounts/{id}").hasAuthority("CLIENT").anyRequest().denyAll();
+                        "/api/clients/current", "/api/loans",
+                        "/api/clients/current/cards", "/web/**", "/api/accounts/{id}").hasAuthority("CLIENT").anyRequest().denyAll();
 
         http.formLogin()
                 .usernameParameter("email")

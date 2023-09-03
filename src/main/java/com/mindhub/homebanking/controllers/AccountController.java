@@ -5,6 +5,8 @@ import com.mindhub.homebanking.models.Account;
 import com.mindhub.homebanking.models.Client;
 import com.mindhub.homebanking.repositories.AccountRepository;
 import com.mindhub.homebanking.repositories.ClientRepository;
+import com.mindhub.homebanking.services.AccountService;
+import com.mindhub.homebanking.services.ClientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,22 +24,21 @@ import java.time.LocalDate;
 @RestController
 @RequestMapping("/api")
 public class AccountController {
-    @Autowired
-    private AccountRepository accountRepository;
-    @Autowired
-    private ClientRepository clientRepository;
 
-
+    @Autowired
+    private AccountService accountService;
+    @Autowired
+    private ClientService clientService;
 
     //tiene validacion que no ingrese un cliente
     @GetMapping("/accounts")
-    public List<AccountDTO> getAccounts(){
-       return accountRepository.findAll().stream().map(account -> new AccountDTO(account)).collect(Collectors.toList());
+    public List<AccountDTO> getAccounts() {
+        return accountService.getAccountsDTO();
     }
 
     //tiene la validacion del cliente autentiicado con sus cuentas, está en antMatchers
     @GetMapping("/accounts/{id}")
-    public AccountDTO getOneAccount(@PathVariable Long id){
+    public AccountDTO getOneAccount(@PathVariable Long id) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -47,65 +48,63 @@ public class AccountController {
 
         String authenticatedClientEmail = authentication.getName();
 
-        Client client = clientRepository.findByEmail(authenticatedClientEmail).orElse(null);
-
-        if(client == null){
+        if (!clientService.existsByEmail(authenticatedClientEmail)) {
             return null;
         }
 
-        Account account = accountRepository.findById(id).orElse(null);
+        Client client = clientService.findByEmail(authenticatedClientEmail);
 
-        if (account == null){
+        if (!accountService.existsById(id)) {
             return null;
         }
 
-        if ( client != account.getClient()) {
+        Account account = accountService.findById(id);
+
+        if (client != account.getClient()) {
             return null;
         }
 
-        AccountDTO accountDTO = accountRepository.findById(id).map(accountAux -> new AccountDTO(accountAux)).orElse(null);
-
-        return accountDTO;
+        return accountService.getAccountDTOById(id);
     }
 
     //valida que la autenticacion no sea nula , está en antMatchers
     @PostMapping("/clients/current/accounts")
-    public ResponseEntity<Object> createAccount(Authentication authentication){
+    public ResponseEntity<Object> createAccount(Authentication authentication) {
 
         if (authentication == null || !authentication.isAuthenticated()) {
             return new ResponseEntity<>("LogIn", HttpStatus.FORBIDDEN);
         }
 
-        Client client = clientRepository.findByEmail(authentication.getName()).orElse(null);
+        if (!clientService.existsByEmail(authentication.getName())) {
+            return new ResponseEntity<>("Client not found", HttpStatus.FORBIDDEN);
+        }
 
-        if (client != null){
-            if(client.getAccounts().size() <= 2){
+        Client client = clientService.findByEmail(authentication.getName());
 
-               LocalDate today = LocalDate.now();
-                Random random = new Random();
-                String number ;
-                int randomNum;
-                
-                do {
-                    randomNum = random.nextInt(90000000) + 10000000;
-                    number = "VIN" + randomNum;
-                } while (accountRepository.existsByNumber(number));
+        if (client.getAccounts().size() <= 2) {
 
-                Account account = new Account(number, today, 0.00);
-                client.addAccount(account);
-                accountRepository.save(account);
-                return new ResponseEntity<>("Account created", HttpStatus.CREATED);
+            LocalDate today = LocalDate.now();
+            Random random = new Random();
+            String number;
+            int randomNum;
 
-            } else{
-                return new ResponseEntity<>("Maximum accounts reached", HttpStatus.FORBIDDEN);
-            }
-        }else{
-           return new ResponseEntity<>("Client not found", HttpStatus.BAD_REQUEST);
+            do {
+                randomNum = random.nextInt(90000000) + 10000000;
+                number = "VIN" + randomNum;
+            } while (accountService.existsByNumber(number));
+
+            Account account = new Account(number, today, 0.00);
+            client.addAccount(account);
+            accountService.saveAccount(account);
+            return new ResponseEntity<>("Account created", HttpStatus.CREATED);
+
+        } else {
+            return new ResponseEntity<>("Maximum accounts reached", HttpStatus.FORBIDDEN);
         }
     }
 
     @GetMapping("/clients/current/accounts")
-    public ResponseEntity<Object> getAccountCurrent(){
+    public ResponseEntity<Object> getAccountCurrent() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -114,17 +113,17 @@ public class AccountController {
 
         String authenticatedClientEmail = authentication.getName();
 
-        Client client = clientRepository.findByEmail(authenticatedClientEmail).orElse(null);
-
-        if(client == null){
+        if (!clientService.existsByEmail(authenticatedClientEmail)) {
             return new ResponseEntity<>("Client not found", HttpStatus.FORBIDDEN);
         }
 
-        Set<Account> setAccountClientCurrent =  client.getAccounts();
+        Client client = clientService.findByEmail(authenticatedClientEmail);
 
-        List<AccountDTO>  listAccountsDTO = setAccountClientCurrent.stream().map(account -> new AccountDTO(account)).collect(Collectors.toList());
+        Set<Account> setAccountClientCurrent = client.getAccounts();
 
-        return new ResponseEntity<>(listAccountsDTO, HttpStatus.CREATED);
+        List<AccountDTO> listAccountsDTO = setAccountClientCurrent.stream().map(account -> new AccountDTO(account)).collect(Collectors.toList());
+
+        return new ResponseEntity<>(listAccountsDTO, HttpStatus.OK);
     }
 
 }

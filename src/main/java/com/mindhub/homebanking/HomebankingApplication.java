@@ -31,7 +31,7 @@ public class HomebankingApplication {
             Client client = new Client("Melba", "Morel", "melba@mindhub.com", passwordEncoder.encode("melba"));
             clientRepository.save(client);
 
-            Client client2 = new Client("Juana", "Gonzalez", "Juanita@mindhub.com",passwordEncoder.encode("juanita"));
+            Client client2 = new Client("Juana", "Gonzalez", "Juanita@mindhub.com", passwordEncoder.encode("juanita"));
             clientRepository.save(client2);
 
             LocalDate today = LocalDate.now();
@@ -109,32 +109,32 @@ public class HomebankingApplication {
 
             client.addClientLoan(clientLoan1);
             loan1.addClientLoan(clientLoan1);
-			clientLoanRepository.save(clientLoan1);
+            clientLoanRepository.save(clientLoan1);
 
-			client.addClientLoan(clientLoan2);
-			loan2.addClientLoan(clientLoan2);
-			clientLoanRepository.save(clientLoan2);
+            client.addClientLoan(clientLoan2);
+            loan2.addClientLoan(clientLoan2);
+            clientLoanRepository.save(clientLoan2);
 
-			ClientLoan clientLoan3 = new ClientLoan(100000.00, 24);
-			ClientLoan clientLoan4 = new ClientLoan(200000.00, 36);
-			clientLoanRepository.save(clientLoan3);
-			clientLoanRepository.save(clientLoan4);
+            ClientLoan clientLoan3 = new ClientLoan(100000.00, 24);
+            ClientLoan clientLoan4 = new ClientLoan(200000.00, 36);
+            clientLoanRepository.save(clientLoan3);
+            clientLoanRepository.save(clientLoan4);
 
-			client2.addClientLoan(clientLoan3);
-			loan2.addClientLoan(clientLoan3);
-			clientLoanRepository.save(clientLoan3);
+            client2.addClientLoan(clientLoan3);
+            loan2.addClientLoan(clientLoan3);
+            clientLoanRepository.save(clientLoan3);
 
-			client2.addClientLoan(clientLoan4);
-			loan3.addClientLoan(clientLoan4);
-			clientLoanRepository.save(clientLoan4);
+            client2.addClientLoan(clientLoan4);
+            loan3.addClientLoan(clientLoan4);
+            clientLoanRepository.save(clientLoan4);
 
 
-            String name1 = client.getFirstName() +" "+ client.getLastName();
-            String name2 = client2.getFirstName() +" "+ client2.getLastName();
+            String name1 = client.getFirstName() + " " + client.getLastName();
+            String name2 = client2.getFirstName() + " " + client2.getLastName();
 
-            Card card1 = new Card(name1,"4666 4666 4666 4666", (short) 789, CardColor.GOLD, CardType.DEBIT, today, today.plusYears(5) );
-            Card card2 = new Card(name1,"4777 4777 4777 4777", (short) 456, CardColor.TITANIUM, CardType.CREDIT , today ,today.plusYears(5));
-            Card card3 = new Card(name2,"4888 4888 4888 4888", (short) 123, CardColor.SILVER, CardType.CREDIT, today ,today.plusYears(5));
+            Card card1 = new Card(name1, "4666 4666 4666 4666", (short) 789, CardColor.GOLD, CardType.DEBIT, today, today.plusYears(5));
+            Card card2 = new Card(name1, "4777 4777 4777 4777", (short) 456, CardColor.TITANIUM, CardType.CREDIT, today, today.plusYears(5));
+            Card card3 = new Card(name2, "4888 4888 4888 4888", (short) 123, CardColor.SILVER, CardType.CREDIT, today, today.plusYears(5));
 
             client.addCard(card1);
             client.addCard(card2);

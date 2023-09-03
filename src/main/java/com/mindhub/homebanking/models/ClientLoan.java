@@ -18,18 +18,19 @@ public class ClientLoan {
     @GenericGenerator(name = "native", strategy = "native")
     private long id;
 
-    private  Double amount;
+    private Double amount;
     private Integer payments;
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name="client_id")
+    @JoinColumn(name = "client_id")
     private Client client;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name="loan_id")
+    @JoinColumn(name = "loan_id")
     private Loan loan;
 
     public ClientLoan() {
     }
+
     public ClientLoan(Double amount, Integer payments) {
         this.amount = amount;
         this.payments = payments;
