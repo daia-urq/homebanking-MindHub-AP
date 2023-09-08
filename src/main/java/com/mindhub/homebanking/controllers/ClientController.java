@@ -35,13 +35,13 @@ public class ClientController {
 
 
     //tiene validacion que no ingrese un cliente,en antmatchers
-    @RequestMapping("/clients")
+    @GetMapping("/clients")
     public List<ClientDTO> getClients() {
         return clientService.getClientsDTO();
     }
 
     //tiene validacion que no ingrese un cliente, en antmatchers
-    @RequestMapping("/clients/{id}")
+    @GetMapping("/clients/{id}")
     public ClientDTO getClient(@PathVariable Long id) {
 
         return clientService.getClientDTOByID(id);
@@ -92,7 +92,7 @@ public class ClientController {
     }
 
 
-    @RequestMapping("/clients/current")
+    @GetMapping("/clients/current")
     public ClientDTO getClientsCurrent(Authentication authentication) {
         return clientService.getClientDTOByEmail(authentication.getName());
     }
