@@ -44,21 +44,17 @@ public class TransactionController {
         //obtener datos de autenticadocion
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return new ResponseEntity<>("LogIn", HttpStatus.FORBIDDEN);
-        }
-
         //validar que los parametros recibidos  no esten vacios
-        if (fromAccountNumber.isEmpty()) {
+        if (fromAccountNumber.isBlank()) {
             return new ResponseEntity<>("Missing from account number", HttpStatus.FORBIDDEN);
         }
-        if (toAccountNumber.isEmpty()) {
+        if (toAccountNumber.isBlank()) {
             return new ResponseEntity<>("Missing to account number", HttpStatus.FORBIDDEN);
         }
-        if (description.isEmpty()) {
+        if (description.isBlank()) {
             return new ResponseEntity<>("Missing description", HttpStatus.FORBIDDEN);
         }
-        if (amount.toString().isEmpty()) {
+        if (amount.toString().isBlank()) {
             return new ResponseEntity<>("Missing amount", HttpStatus.FORBIDDEN);
         }
 

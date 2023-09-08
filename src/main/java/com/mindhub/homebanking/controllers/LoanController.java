@@ -43,10 +43,6 @@ public class LoanController {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return new ResponseEntity<>("LogIn", HttpStatus.FORBIDDEN);
-        }
-
         if (loanAplicationDTO.getLoanId() == 0 || loanAplicationDTO.getLoanId() < 0) {
             return new ResponseEntity<>("Error id", HttpStatus.FORBIDDEN);
         }
@@ -59,7 +55,7 @@ public class LoanController {
             return new ResponseEntity<>("Invalid payments", HttpStatus.FORBIDDEN);
         }
 
-        if (loanAplicationDTO.getToAccountNumber().isEmpty()) {
+        if (loanAplicationDTO.getToAccountNumber().isBlank()) {
             return new ResponseEntity<>("Missing account number", HttpStatus.FORBIDDEN);
         }
 
@@ -68,10 +64,6 @@ public class LoanController {
         }
 
         Account account = accountService.findByNumber(loanAplicationDTO.getToAccountNumber());
-
-        if(!clientService.existsByEmail(authentication.getName())){
-            return new ResponseEntity<>("This client does not exist", HttpStatus.FORBIDDEN);
-        }
 
         Client client = clientService.findByEmail(authentication.getName());
 
@@ -107,7 +99,6 @@ public class LoanController {
         accountService.saveAccount(account);
 
         ClientLoan clientLoan = new ClientLoan(amountInterest, loanAplicationDTO.getPayments());
-
 
         clientLoanService.saveClientLoan(clientLoan);
 

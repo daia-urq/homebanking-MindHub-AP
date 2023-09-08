@@ -42,15 +42,7 @@ public class AccountController {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return null;
-        }
-
         String authenticatedClientEmail = authentication.getName();
-
-        if (!clientService.existsByEmail(authenticatedClientEmail)) {
-            return null;
-        }
 
         Client client = clientService.findByEmail(authenticatedClientEmail);
 
@@ -71,14 +63,6 @@ public class AccountController {
     @PostMapping("/clients/current/accounts")
     public ResponseEntity<Object> createAccount(Authentication authentication) {
 
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return new ResponseEntity<>("LogIn", HttpStatus.FORBIDDEN);
-        }
-
-        if (!clientService.existsByEmail(authentication.getName())) {
-            return new ResponseEntity<>("Client not found", HttpStatus.FORBIDDEN);
-        }
-
         Client client = clientService.findByEmail(authentication.getName());
 
         if (client.getAccounts().size() <= 2) {
@@ -87,7 +71,6 @@ public class AccountController {
             Random random = new Random();
             String number;
             int randomNum;
-
             do {
                 randomNum = random.nextInt(90000000) + 10000000;
                 number = "VIN" + randomNum;
@@ -107,15 +90,7 @@ public class AccountController {
     public ResponseEntity<Object> getAccountCurrent() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return new ResponseEntity<>("LogIn", HttpStatus.FORBIDDEN);
-        }
-
         String authenticatedClientEmail = authentication.getName();
-
-        if (!clientService.existsByEmail(authenticatedClientEmail)) {
-            return new ResponseEntity<>("Client not found", HttpStatus.FORBIDDEN);
-        }
 
         Client client = clientService.findByEmail(authenticatedClientEmail);
 

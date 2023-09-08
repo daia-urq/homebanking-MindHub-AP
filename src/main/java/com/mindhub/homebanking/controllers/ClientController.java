@@ -50,19 +50,19 @@ public class ClientController {
     @PostMapping("/clients")
     public ResponseEntity<Object> register(@RequestParam String firstName, @RequestParam String lastName, @RequestParam String email, @RequestParam String password) {
 
-        if (firstName.isEmpty()) {
+        if (firstName.isBlank()) {
             return new ResponseEntity<>("Missing first name", HttpStatus.FORBIDDEN);
         }
 
-        if (lastName.isEmpty()) {
+        if (lastName.isBlank()) {
             return new ResponseEntity<>("Missing last name", HttpStatus.FORBIDDEN);
         }
 
-        if (email.isEmpty()) {
+        if (email.isBlank()) {
             return new ResponseEntity<>("Missing email", HttpStatus.FORBIDDEN);
         }
 
-        if (password.isEmpty()) {
+        if (password.isBlank()) {
             return new ResponseEntity<>("Missing password", HttpStatus.FORBIDDEN);
         }
 
@@ -94,10 +94,6 @@ public class ClientController {
 
     @RequestMapping("/clients/current")
     public ClientDTO getClientsCurrent(Authentication authentication) {
-
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return null;
-        }
         return clientService.getClientDTOByEmail(authentication.getName());
     }
 

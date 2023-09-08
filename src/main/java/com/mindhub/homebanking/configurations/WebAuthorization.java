@@ -26,10 +26,13 @@ class WebAuthorization {
                 .antMatchers("/web/index.html", "/web/js/index.js",
                         "/web/css/style.css", "/web/img/**").permitAll()
                 .antMatchers(HttpMethod.POST, "/api/clients").permitAll()
-                .antMatchers(HttpMethod.POST, "/api/transactions").hasAuthority("CLIENT")
                 .antMatchers("/api/clients/current/accounts",
                         "/api/clients/current", "/api/loans",
-                        "/api/clients/current/cards", "/web/**", "/api/accounts/{id}").hasAuthority("CLIENT").anyRequest().denyAll();
+                        "/api/clients/current/cards", "/api/accounts/{id}").hasAuthority("CLIENT")
+                .antMatchers(HttpMethod.POST, "/api/transactions").hasAuthority("CLIENT").antMatchers( "/web/**").hasAnyAuthority("CLIENT","ADMIN")
+                .antMatchers("/api/accounts","/api/clients", "/api/clients/{id}","/rest/**","/h2-console/").hasAuthority("ADMIN")
+                .anyRequest().denyAll()
+                ;
 
         http.formLogin()
                 .usernameParameter("email")

@@ -32,63 +32,43 @@ public class CardController {
     @PostMapping("/clients/current/cards")
     public ResponseEntity<Object> createCard(@RequestParam CardType cardType, @RequestParam CardColor cardColor, Authentication authentication) {
 
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return new ResponseEntity<>("LogIn", HttpStatus.FORBIDDEN);
-        }
-
-        if (cardColor == null) {
-            return new ResponseEntity<>("Missing card color", HttpStatus.FORBIDDEN);
-        }
-
-        if (cardType == null) {
-            return new ResponseEntity<>("Missing card type", HttpStatus.FORBIDDEN);
-        }
-
-        if (!clientService.existsByEmail(authentication.getName())) {
-            return new ResponseEntity<>("Client not found", HttpStatus.FORBIDDEN);
-        }
-
         Client client = clientService.findByEmail(authentication.getName());
 
         Set<Card> cards = client.getCards();
         long countTypeCards = cards.stream().filter(card -> cardType.equals(card.getType())).count();
 
-        if (countTypeCards <= 2) {
+        if (countTypeCards < CardColor.values().length) {
             Random random = new Random();
             LocalDate today = LocalDate.now();
             String name = client.getFirstName() + " " + client.getLastName();
 
             int cvv = random.nextInt(999) + 1;
-            //agrega ceros a la izquierda si el nuumero es menor a 100
             String formattedCvv = String.format("%03d", cvv);
-            //lo pasa a short para poder pasrlo por el constructor
             short cvvShort = Short.parseShort(formattedCvv);
 
-            //numero de tarjeta
-            String cardNumber;
+            String finalCardNumber;
             do {
-                //para crear el numero de tarjeta de 16 digitos
-                StringBuilder cardNumberBuilder = new StringBuilder();
-                cardNumber = null;
-                for (int i = 0; i < 4; i++) {
-                    for (int j = 0; j < 4; j++) {
-                        int digit = random.nextInt(10);
-                        cardNumberBuilder.append(digit);
-                    }
-                    if (i < 3) {
-                        cardNumberBuilder.append(" ");
+                StringBuilder cardNumber = new StringBuilder(16);
+
+                for (int j = 0; j < 4; j++) {
+                    int fourDigit = random.nextInt(9999) + 1;
+                    String numbers = String.format("%04d", fourDigit);
+                    cardNumber.append(numbers);
+                    if (j < 3) {
+                        cardNumber.append(" ");
                     }
                 }
-                cardNumber = cardNumberBuilder.toString();
-            } while (cardService.existsByNumber(cardNumber));
+                finalCardNumber = cardNumber.toString();
+            } while (cardService.existsByNumber(finalCardNumber));
 
-            Card card = new Card(name, cardNumber, cvvShort, cardColor, cardType, today, today.plusYears(5));
+
+            Card card = new Card(name, finalCardNumber, cvvShort, cardColor, cardType, today, today.plusYears(5));
             client.addCard(card);
 
             cardService.saveCard(card);
             return new ResponseEntity<>("Card created", HttpStatus.CREATED);
         } else {
             return new ResponseEntity<>("Maximum card reached", HttpStatus.FORBIDDEN);
-        }
+}
     }
 }
