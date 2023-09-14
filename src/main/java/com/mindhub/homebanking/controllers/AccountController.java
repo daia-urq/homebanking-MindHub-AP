@@ -20,7 +20,6 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.time.LocalDate;
-
 @RestController
 @RequestMapping("/api")
 public class AccountController {
@@ -99,6 +98,36 @@ public class AccountController {
         List<AccountDTO> listAccountsDTO = setAccountClientCurrent.stream().map(account -> new AccountDTO(account)).collect(Collectors.toList());
 
         return new ResponseEntity<>(listAccountsDTO, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/clients/current/accounts/{id}")
+    public ResponseEntity<Object> deleteAccount(@PathVariable long id){
+
+        if(!accountService.existsById(id)){
+            return new ResponseEntity<>("The account does not exist", HttpStatus.FORBIDDEN);
+        }
+
+        Account account = accountService.findById(id);
+
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        String authenticatedClientEmail = authentication.getName();
+
+        Client client = clientService.findByEmail(authenticatedClientEmail);
+
+        Set<Account> setAccountClientCurrent = client.getAccounts();
+
+        if(!setAccountClientCurrent.contains(account)){
+            return new ResponseEntity<>("This account is not yours", HttpStatus.FORBIDDEN);
+        }
+
+        if(account.getBalance()>0){
+            return new ResponseEntity<>("The account has a balance", HttpStatus.FORBIDDEN);
+        }
+
+        accountService.deleteAccount(id);
+        return new ResponseEntity<>("Account delete", HttpStatus.OK);
     }
 
 }

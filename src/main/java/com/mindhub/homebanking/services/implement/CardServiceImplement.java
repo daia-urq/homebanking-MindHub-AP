@@ -21,4 +21,19 @@ public class CardServiceImplement implements CardService {
         cardRepository.save(card);
     }
 
+    @Override
+    public void deleteCard(Long id) {
+        cardRepository.deleteById(id);
+    }
+
+    @Override
+    public Boolean existsById(long id) {
+        return cardRepository.existsById(id);
+    }
+
+    @Override
+    public Card findById(Long id) {
+        return cardRepository.findById(id).orElse(null);
+    }
+
 }

@@ -23,4 +23,6 @@ public interface AccountService {
 
     AccountDTO getAccountDTOById(long id);
 
+    void deleteAccount(Long id);
+
 }

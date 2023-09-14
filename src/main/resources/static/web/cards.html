@@ -20,6 +20,7 @@
         }
     </style>
     <div id="app" v-cloak>
+
         <div class="toast-container position-absolute p-3 top-0 end-0" id="toastPlacement">
             <div id="danger-toast" data-bs-delay="2000" class="toast align-items-center text-white bg-danger border-0"
                 role="alert" aria-live="assertive" aria-atomic="true">
@@ -103,7 +104,7 @@
                                 </div>
                                 <div class="plastic-card__space-25">
                                     <span class="plastic-card__label">Expires</span>
-                                    <p class="plastic-card__info">{{ formatDate(card.thruDate) }}</p>
+                                    <p class="plastic-card__info"  :class="{ 'text-danger': isExpired(card.thruDate) }">{{ formatDate(card.thruDate) }}</p>
                                 </div>
                             </div>
 
@@ -118,6 +119,7 @@
                                         <span class="plastic-card__label">{{ card.type}} {{ card.color }}</span>
                                     </div>
                                     <img class="plastic-card__back-logo plastic-card__logo" src="img/Mindhub-logo.png">
+                                    <button @click="deleteCard(card.id)" class="btn btn-danger">Delete</button>
                                 </div>
                             </div>
                         </div>
@@ -158,6 +160,7 @@
                                         <span class="plastic-card__label">{{ card.type}} {{ card.color }}</span>
                                     </div>
                                     <img class="plastic-card__back-logo plastic-card__logo" src="img/Mindhub-logo.png">
+                                    <button @click="deleteCard(card.id)" class="btn btn-danger">Delete</button>
                                 </div>
                             </div>
                         </div>

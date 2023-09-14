@@ -25,10 +25,12 @@ dependencies {
 	implementation 'org.jetbrains:annotations:24.0.0'
 	implementation 'org.jetbrains:annotations:24.0.0'
 	implementation 'org.jetbrains:annotations:24.0.0'
-	runtimeOnly 'com.h2database:h2'
+    testImplementation 'junit:junit:4.13.1'
+//  runtimeOnly 'com.h2database:h2'
 	implementation 'org.postgresql:postgresql'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
 tasks.named('test') {

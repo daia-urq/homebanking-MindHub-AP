@@ -8,14 +8,14 @@ import com.mindhub.homebanking.repositories.CardRepository;
 import com.mindhub.homebanking.repositories.ClientRepository;
 import com.mindhub.homebanking.services.CardService;
 import com.mindhub.homebanking.services.ClientService;
+import com.mindhub.homebanking.utils.CardUtils;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.Random;
@@ -42,23 +42,13 @@ public class CardController {
             LocalDate today = LocalDate.now();
             String name = client.getFirstName() + " " + client.getLastName();
 
-            int cvv = random.nextInt(999) + 1;
+            int cvv = CardUtils.getCvv(random);
             String formattedCvv = String.format("%03d", cvv);
             short cvvShort = Short.parseShort(formattedCvv);
 
             String finalCardNumber;
             do {
-                StringBuilder cardNumber = new StringBuilder(16);
-
-                for (int j = 0; j < 4; j++) {
-                    int fourDigit = random.nextInt(9999) + 1;
-                    String numbers = String.format("%04d", fourDigit);
-                    cardNumber.append(numbers);
-                    if (j < 3) {
-                        cardNumber.append(" ");
-                    }
-                }
-                finalCardNumber = cardNumber.toString();
+                finalCardNumber = CardUtils.getCardNumber();
             } while (cardService.existsByNumber(finalCardNumber));
 
 
@@ -69,6 +59,29 @@ public class CardController {
             return new ResponseEntity<>("Card created", HttpStatus.CREATED);
         } else {
             return new ResponseEntity<>("Maximum card reached", HttpStatus.FORBIDDEN);
-}
+        }
     }
+
+
+    @DeleteMapping("/clients/current/card/{id}")
+    public ResponseEntity<Object> deleteCard(@PathVariable Long id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!cardService.existsById(id)) {
+            return new ResponseEntity<>("The card does not exist", HttpStatus.FORBIDDEN);
+        }
+
+        Card card = cardService.findById(id);
+
+        Client client = clientService.findByEmail(authentication.getName());
+
+        Set<Card> cards =  client.getCards();
+        if(!cards.contains(card)){
+            return new ResponseEntity<>("This card is not yours", HttpStatus.FORBIDDEN);
+        }
+
+        cardService.deleteCard(id);
+        return new ResponseEntity<>("The card was deleted", HttpStatus.OK);
+    }
+
 }

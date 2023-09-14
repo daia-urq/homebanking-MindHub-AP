@@ -9,4 +9,10 @@ public interface CardService {
     Boolean existsByNumber(String number);
 
     void saveCard(Card card);
+
+    void deleteCard(Long id);
+
+    Boolean existsById(long id);
+
+    Card findById(Long id);
 }

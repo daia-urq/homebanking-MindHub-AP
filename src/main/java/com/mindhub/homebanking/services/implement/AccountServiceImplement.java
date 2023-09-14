@@ -49,4 +49,9 @@ public class AccountServiceImplement implements AccountService {
     public AccountDTO getAccountDTOById(long id){
         return new AccountDTO(this.findById(id));
     }
+
+    @Override
+    public void deleteAccount(Long id) {
+        accountRepository.deleteById(id);
+    }
 }

@@ -9,11 +9,11 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.WebAttributes;
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-
 
 @Configuration
 @EnableWebSecurity
@@ -29,7 +29,10 @@ class WebAuthorization {
                 .antMatchers("/api/clients/current/accounts",
                         "/api/clients/current", "/api/loans",
                         "/api/clients/current/cards", "/api/accounts/{id}").hasAuthority("CLIENT")
-                .antMatchers(HttpMethod.POST, "/api/transactions").hasAuthority("CLIENT").antMatchers( "/web/**").hasAnyAuthority("CLIENT","ADMIN")
+                .antMatchers(HttpMethod.POST, "/api/transactions").hasAuthority("CLIENT")
+                .antMatchers(HttpMethod.DELETE,"/api/clients/current/card/{id}").hasAuthority("CLIENT")
+                .antMatchers(HttpMethod.DELETE,"/api/clients/current/accounts/{id}").hasAuthority("CLIENT")
+                .antMatchers( "/web/**").hasAnyAuthority("CLIENT","ADMIN")
                 .antMatchers("/api/accounts","/api/clients", "/api/clients/{id}","/rest/**","/h2-console/").hasAuthority("ADMIN")
                 .anyRequest().denyAll()
                 ;

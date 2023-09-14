@@ -1,9 +1,10 @@
 Vue.createApp({
     data() {
         return {
-            accountInfo: {},
+            accountInfo: {
+            },
             errorToats: null,
-            errorMsg: null,
+            errorMsg: null
         }
     },
     methods: {
@@ -14,7 +15,7 @@ Vue.createApp({
                 .then((response) => {
                     //get client ifo
                     this.accountInfo = response.data;
-                    this.accountInfo.transactions.sort((a, b) => (b.id - a.id))
+                    this.accountInfo.transactions.sort((a, b) => (b.id - a.id));
                 })
                 .catch((error) => {
                     // handle error
@@ -33,6 +34,19 @@ Vue.createApp({
                     this.errorToats.show();
                 })
         },
+          deleteAccount: function (id) {
+                     const isConfirmed = confirm("Are you sure you want to delete the account?");
+                      if (isConfirmed) {
+                            axios.delete('/api/clients/current/accounts/' + id)
+                                 .then(response => {
+                                               window.location.href = "/web/accounts.html";
+                                           })
+                                           .catch(error => {
+                                               this.errorMsg = error.response.data;
+                                               this.errorToats.show();
+                                           });
+                      }
+                },
     },
     mounted: function () {
         this.errorToats = new bootstrap.Toast(document.getElementById('danger-toast'));

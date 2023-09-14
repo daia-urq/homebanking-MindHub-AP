@@ -43,7 +43,7 @@ public class LoanController {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (loanAplicationDTO.getLoanId() == 0 || loanAplicationDTO.getLoanId() < 0) {
+        if (loanAplicationDTO.getLoanId() <= 0) {
             return new ResponseEntity<>("Error id", HttpStatus.FORBIDDEN);
         }
 
